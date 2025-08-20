@@ -50,7 +50,7 @@ function call(MPV) {
 		) {
 			// 将对应的指令输出到串行量信号1
 			MRV["Output"]["Pos1"] = commands[i];
-			console.log("输出指令: " + commands[i] + " (对应输入" + inputName + ")");
+			//console.log("输出指令: " + commands[i] + " (对应输入" + inputName + ")");
 			MRV["Refresh"].push("Pos1");
 			// 只处理第一个为true的输入，避免冲突
 			break;

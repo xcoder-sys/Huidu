@@ -17,7 +17,7 @@ exports.call = function (MPV) {
 	var outChannel = 0;
 
 	// 输入通道触发 (Pos1~Pos16 -> 1V, 2V, ...)
-	for (var i = 1; i <= 16; i++) {
+	for (var i = 1; i <= 4; i++) {
 		var name = "Pos" + i;
 		var curr = MPV.Input[name] && MPV.Input[name].SignalValue === true;
 		var prev = MRV.PrivateInfo.InputPreviousValue[name] || false;
@@ -31,7 +31,7 @@ exports.call = function (MPV) {
 	}
 
 	// 输出通道触发 (Pos17~Pos32 -> 1., 2., ...)
-	for (var j = 17; j <= 32; j++) {
+	for (var j = 5; j <= 8; j++) {
 		var name2 = "Pos" + j;
 		var curr2 = MPV.Input[name2] && MPV.Input[name2].SignalValue === true;
 		var prev2 = MRV.PrivateInfo.InputPreviousValue[name2] || false;

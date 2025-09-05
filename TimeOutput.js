@@ -1,4 +1,3 @@
-// TimeOutput.js
 exports.call = function (MPV) {
 	var MRV = {
 		Output: {},
@@ -10,11 +9,11 @@ exports.call = function (MPV) {
 		Token: "",
 	};
 
-	var trigPos = "Pos1"; // 输入信号 trig1
-	var outPos = "Pos1"; // 输出信号 out1
+	var trigPos = "Pos1"; // 输入数字量位置 (trig1)
+	var outPos = "Pos1"; // 输出串行量位置 (out1)
 
-	// 恢复上次状态
-	if ("PrivateInfo" in MPV) {
+	// 恢复上次状态（系统会把 MRV.PrivateInfo 传回 MPV.PrivateInfo）
+	if ("PrivateInfo" in MPV && MPV.PrivateInfo) {
 		MRV.PrivateInfo = MPV.PrivateInfo;
 	}
 
@@ -25,7 +24,7 @@ exports.call = function (MPV) {
 		var now = new Date();
 		var nowMs = now.getTime();
 
-		// 只在 1 秒间隔时输出
+		// 超过 1 秒才输出
 		if (nowMs - (MRV.PrivateInfo.LastTime || 0) >= 1000) {
 			var timeStr =
 				now.getFullYear() +

@@ -1,30 +1,30 @@
 
 function call(MPV) {
-	/* ·µ»ØÊı¾İMRV»ù±¾Êı¾İ¸ñÊ½¶¨Òå */
+	/* è¿”å›æ•°æ®MRVåŸºæœ¬æ•°æ®æ ¼å¼å®šä¹‰ */
 	var MRV = {
-		/*Êä³öÊı¾İ£¬°üº¬Êä³öµÄĞÅºÅÎ»ÖÃºÍÖµ*/
+		/*è¾“å‡ºæ•°æ®ï¼ŒåŒ…å«è¾“å‡ºçš„ä¿¡å·ä½ç½®å’Œå€¼*/
 		Output: {},
-		/* Ä£¿éÄÚ²¿Ë½ÓĞÊı¾İ´æ´¢½á¹¹ */
+		/* æ¨¡å—å†…éƒ¨ç§æœ‰æ•°æ®å­˜å‚¨ç»“æ„ */
 		PrivateInfo: {
 			OutputPreviousValue: {},
 		},
-		/* Êä³öË¢ĞÂĞÅºÅÎ»ÖÃ */
+		/* è¾“å‡ºåˆ·æ–°ä¿¡å·ä½ç½® */
 		Refresh: [],
 		Token: "",
 	};
 
-	// --- ÔÚÕâÀï¶¨ÒåÄãµÄÓ²±àÂëÖ¸Áî×Ö·û´® ---
-	// ¼üÊÇÊäÈëĞÅºÅµÄÃû³Æ (ÀıÈç "trigger1", "trigger2")
-	// ÖµÊÇµ±¸ÃĞÅºÅ´¥·¢Ê±Òª·¢ËÍµÄ×Ö·û´®Ö¸Áî
+	// --- åœ¨è¿™é‡Œå®šä¹‰ä½ çš„ç¡¬ç¼–ç æŒ‡ä»¤å­—ç¬¦ä¸² ---
+	// é”®æ˜¯è¾“å…¥ä¿¡å·çš„åç§° (ä¾‹å¦‚ "trigger1", "trigger2")
+	// å€¼æ˜¯å½“è¯¥ä¿¡å·è§¦å‘æ—¶è¦å‘é€çš„å­—ç¬¦ä¸²æŒ‡ä»¤
 	var hardcodedCommands = {
 		trigger1: "START_PROCESS_A",
 		trigger2: "STOP_PROCESS_B",
 		trigger3: "RESET_SYSTEM",
-		// Äã¿ÉÒÔÔÚÕâÀïÌí¼Ó¸ü¶à "triggerX": "¶ÔÓ¦µÄÖ¸Áî"
+		// ä½ å¯ä»¥åœ¨è¿™é‡Œæ·»åŠ æ›´å¤š "triggerX": "å¯¹åº”çš„æŒ‡ä»¤"
 	};
 	// ------------------------------------
 
-	// »ñÈ¡Êä³ö "commandOut" ¶ÔÓ¦µÄ Pos (ÀıÈç "Pos1")
+	// è·å–è¾“å‡º "commandOut" å¯¹åº”çš„ Pos (ä¾‹å¦‚ "Pos1")
 	var commandOutPos = "";
 	if (
 		MPV.SignalNameVSPos &&
@@ -36,10 +36,10 @@ function call(MPV) {
 		commandOutPos = "Pos1";
 	}
 
-	var commandToSend = ""; // ´æ´¢×îÖÕÒª·¢ËÍµÄÖ¸Áî×Ö·û´®
-	var outputTriggered = false; // ±ê¼ÇÊÇ·ñÓĞÈÎºÎ´¥·¢µ¼ÖÂÁËÊä³ö
+	var commandToSend = ""; // å­˜å‚¨æœ€ç»ˆè¦å‘é€çš„æŒ‡ä»¤å­—ç¬¦ä¸²
+	var outputTriggered = false; // æ ‡è®°æ˜¯å¦æœ‰ä»»ä½•è§¦å‘å¯¼è‡´äº†è¾“å‡º
 
-	// 2. ±éÀúËùÓĞ¿ÉÄÜµÄÊäÈëĞÅºÅ
+	// 2. éå†æ‰€æœ‰å¯èƒ½çš„è¾“å…¥ä¿¡å·
 	var inputSignalsMap = MPV.SignalNameVSPos.Input;
 
 	if (inputSignalsMap && typeof inputSignalsMap === "object") {
@@ -47,7 +47,7 @@ function call(MPV) {
 			if (Object.prototype.hasOwnProperty.call(inputSignalsMap, signalName)) {
 				var currentInputPos = inputSignalsMap[signalName];
 
-				// ½¡×³µØ»ñÈ¡µ±Ç°ÊäÈëĞÅºÅµÄÖµ
+				// å¥å£®åœ°è·å–å½“å‰è¾“å…¥ä¿¡å·çš„å€¼
 				var currentTriggerValue = false;
 				if (
 					MPV.Input &&
@@ -57,7 +57,7 @@ function call(MPV) {
 					currentTriggerValue = MPV.Input[currentInputPos].SignalValue;
 				}
 
-				// ½¡×³µØ»ñÈ¡ÉÏ´ÎÊäÈëĞÅºÅµÄÖµ
+				// å¥å£®åœ°è·å–ä¸Šæ¬¡è¾“å…¥ä¿¡å·çš„å€¼
 				var previousTriggerValue = false;
 				if (
 					MPV.PrivateInfo &&
@@ -69,7 +69,7 @@ function call(MPV) {
 						MPV.PrivateInfo.InputPreviousValue[currentInputPos];
 				}
 
-				// ¼ì²éµ±Ç°ÊäÈëĞÅºÅÊÇ·ñÔÚ±¾´ÎË¢ĞÂÁĞ±íÖĞ
+				// æ£€æŸ¥å½“å‰è¾“å…¥ä¿¡å·æ˜¯å¦åœ¨æœ¬æ¬¡åˆ·æ–°åˆ—è¡¨ä¸­
 				var isRefreshed = false;
 				if (MPV.Refresh && Array.isArray(MPV.Refresh)) {
 					for (var i = 0; i < MPV.Refresh.length; i++) {
@@ -80,12 +80,12 @@ function call(MPV) {
 					}
 				}
 
-				// 3. ÅĞ¶ÏÉÏÉıÑØ²¢»ñÈ¡Ö¸Áî
+				// 3. åˆ¤æ–­ä¸Šå‡æ²¿å¹¶è·å–æŒ‡ä»¤
 				if (isRefreshed) {
 					if (currentTriggerValue === true && previousTriggerValue === false) {
-						// ¼ì²âµ½ÉÏÉıÑØ£¬´ÓÓ²±àÂë¶ÔÏóÖĞ»ñÈ¡Ö¸Áî
+						// æ£€æµ‹åˆ°ä¸Šå‡æ²¿ï¼Œä»ç¡¬ç¼–ç å¯¹è±¡ä¸­è·å–æŒ‡ä»¤
 						if (hardcodedCommands.hasOwnProperty(signalName)) {
-							// Èç¹ûÓĞ¶à¸ö´¥·¢£¬Ö»·¢ËÍµÚÒ»¸ö·¢ÏÖµÄÖ¸Áî
+							// å¦‚æœæœ‰å¤šä¸ªè§¦å‘ï¼Œåªå‘é€ç¬¬ä¸€ä¸ªå‘ç°çš„æŒ‡ä»¤
 							if (!outputTriggered) {
 								commandToSend = hardcodedCommands[signalName];
 								outputTriggered = true;
@@ -94,14 +94,14 @@ function call(MPV) {
 					}
 				}
 
-				// 4. ¼ÇÂ¼±¾´ÎÊäÈëĞÅºÅµÄ×´Ì¬µ½ PrivateInfo£¬¹©ÏÂ´Îµ÷ÓÃÊ¹ÓÃ
+				// 4. è®°å½•æœ¬æ¬¡è¾“å…¥ä¿¡å·çš„çŠ¶æ€åˆ° PrivateInfoï¼Œä¾›ä¸‹æ¬¡è°ƒç”¨ä½¿ç”¨
 				MRV.PrivateInfo.InputPreviousValue[currentInputPos] =
 					currentTriggerValue;
 			}
 		}
 	}
 
-	// 5. ¸ù¾İÊÇ·ñ´¥·¢ÉèÖÃ×îÖÕÊä³ö
+	// 5. æ ¹æ®æ˜¯å¦è§¦å‘è®¾ç½®æœ€ç»ˆè¾“å‡º
 	if (outputTriggered) {
 		MRV.Output[commandOutPos] = commandToSend;
 		MRV.Refresh.push(commandOutPos);
@@ -109,6 +109,6 @@ function call(MPV) {
 		MRV.Output[commandOutPos] = "";
 	}
 
-	// 6. ·µ»Ø MRV
+	// 6. è¿”å› MRV
 	return MRV;
 }

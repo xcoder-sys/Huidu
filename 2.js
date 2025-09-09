@@ -1,30 +1,30 @@
-/* HardcodedMultiTriggerSender.js - ES5 ±ê×¼ÊµÏÖ */
+/* HardcodedMultiTriggerSender.js - ES5 æ ‡å‡†å®ç° */
 
 exports.call = function (MPV) {
-	// 1. ³õÊ¼»¯ MRV ·µ»Ø¶ÔÏó
+	// 1. åˆå§‹åŒ– MRV è¿”å›å¯¹è±¡
 	var MRV = {
 		Output: {},
 		PrivateInfo: {
-			InputPreviousValue: {}, // ÓÃÓÚ´æ´¢ËùÓĞ´¥·¢ĞÅºÅµÄÉÏ´Î×´Ì¬
+			InputPreviousValue: {}, // ç”¨äºå­˜å‚¨æ‰€æœ‰è§¦å‘ä¿¡å·çš„ä¸Šæ¬¡çŠ¶æ€
 		},
 		Refresh: [],
-		Token: MPV.Token || "", // È·±£ Token ×ÜÊÇ±»´«µİ£¬Èç¹û MPV.Token ²»´æÔÚÔò¸ø¿Õ×Ö·û´®
+		Token: MPV.Token || "", // ç¡®ä¿ Token æ€»æ˜¯è¢«ä¼ é€’ï¼Œå¦‚æœ MPV.Token ä¸å­˜åœ¨åˆ™ç»™ç©ºå­—ç¬¦ä¸²
 	};
 
-	// --- ÔÚÕâÀï¶¨ÒåÄãµÄÓ²±àÂë×Ö·û´®²ÎÊı ---
-	// ¼üÊÇÊäÈëĞÅºÅµÄÃû³Æ (ÀıÈç "trigger1", "trigger2")
-	// ÖµÊÇµ±¸ÃĞÅºÅ´¥·¢Ê±Òª·¢ËÍµÄ×Ö·û´®
+	// --- åœ¨è¿™é‡Œå®šä¹‰ä½ çš„ç¡¬ç¼–ç å­—ç¬¦ä¸²å‚æ•° ---
+	// é”®æ˜¯è¾“å…¥ä¿¡å·çš„åç§° (ä¾‹å¦‚ "trigger1", "trigger2")
+	// å€¼æ˜¯å½“è¯¥ä¿¡å·è§¦å‘æ—¶è¦å‘é€çš„å­—ç¬¦ä¸²
 	var hardcodedStrings = {
 		trigger1: "Hello from Button 1",
 		trigger2: "Action confirmed!",
 		trigger3: "Warning: Temperature High",
 		trigger4: "System Reset Initiated",
-		// Äã¿ÉÒÔÔÚÕâÀïÌí¼Ó¸ü¶à "triggerX": "¶ÔÓ¦µÄ×Ö·û´®"
-		// È·±£ÕâĞ©¼üÓëÄãÔÚÄ£¿éÊÓÍ¼ÖĞ¶¨ÒåµÄÊäÈëĞÅºÅÃû³ÆÒ»ÖÂ
+		// ä½ å¯ä»¥åœ¨è¿™é‡Œæ·»åŠ æ›´å¤š "triggerX": "å¯¹åº”çš„å­—ç¬¦ä¸²"
+		// ç¡®ä¿è¿™äº›é”®ä¸ä½ åœ¨æ¨¡å—è§†å›¾ä¸­å®šä¹‰çš„è¾“å…¥ä¿¡å·åç§°ä¸€è‡´
 	};
 	// ------------------------------------
 
-	// »ñÈ¡Êä³ö "serialOut" ¶ÔÓ¦µÄ Pos (ÀıÈç "Pos1")
+	// è·å–è¾“å‡º "serialOut" å¯¹åº”çš„ Pos (ä¾‹å¦‚ "Pos1")
 	var serialOutPos = "";
 	if (
 		MPV.SignalNameVSPos &&
@@ -33,22 +33,22 @@ exports.call = function (MPV) {
 	) {
 		serialOutPos = MPV.SignalNameVSPos.Output.serialOut;
 	} else {
-		// ¶µµ×·½°¸£ºÈç¹û SignalNameVSPos Ã»Ìá¹©£¬¼ÙÉèÊä³öÎ»ÖÃÊÇ "Pos1"
+		// å…œåº•æ–¹æ¡ˆï¼šå¦‚æœ SignalNameVSPos æ²¡æä¾›ï¼Œå‡è®¾è¾“å‡ºä½ç½®æ˜¯ "Pos1"
 		serialOutPos = "Pos1";
 	}
 
-	var valueToSend = ""; // ´æ´¢×îÖÕÒª·¢ËÍµÄ×Ö·û´®
-	var outputTriggered = false; // ±ê¼ÇÊÇ·ñÓĞÈÎºÎ´¥·¢µ¼ÖÂÁËÊä³ö
+	var valueToSend = ""; // å­˜å‚¨æœ€ç»ˆè¦å‘é€çš„å­—ç¬¦ä¸²
+	var outputTriggered = false; // æ ‡è®°æ˜¯å¦æœ‰ä»»ä½•è§¦å‘å¯¼è‡´äº†è¾“å‡º
 
-	// 2. ±éÀúËùÓĞ¿ÉÄÜµÄÊäÈëĞÅºÅ (trigger1, trigger2, ...)
+	// 2. éå†æ‰€æœ‰å¯èƒ½çš„è¾“å…¥ä¿¡å· (trigger1, trigger2, ...)
 	var inputSignalsMap = MPV.SignalNameVSPos.Input;
 
 	if (inputSignalsMap && typeof inputSignalsMap === "object") {
 		for (var signalName in inputSignalsMap) {
 			if (Object.prototype.hasOwnProperty.call(inputSignalsMap, signalName)) {
-				var currentInputPos = inputSignalsMap[signalName]; // µ±Ç°ÊäÈëµÄ Pos ±êÊ¶·û (Èç "Pos1")
+				var currentInputPos = inputSignalsMap[signalName]; // å½“å‰è¾“å…¥çš„ Pos æ ‡è¯†ç¬¦ (å¦‚ "Pos1")
 
-				// ½¡×³µØ»ñÈ¡µ±Ç°ÊäÈëĞÅºÅµÄÖµ
+				// å¥å£®åœ°è·å–å½“å‰è¾“å…¥ä¿¡å·çš„å€¼
 				var currentTriggerValue = false;
 				if (
 					MPV.Input &&
@@ -58,7 +58,7 @@ exports.call = function (MPV) {
 					currentTriggerValue = MPV.Input[currentInputPos].SignalValue;
 				}
 
-				// ½¡×³µØ»ñÈ¡ÉÏ´ÎÊäÈëĞÅºÅµÄÖµ
+				// å¥å£®åœ°è·å–ä¸Šæ¬¡è¾“å…¥ä¿¡å·çš„å€¼
 				var previousTriggerValue = false;
 				if (
 					MPV.PrivateInfo &&
@@ -70,7 +70,7 @@ exports.call = function (MPV) {
 						MPV.PrivateInfo.InputPreviousValue[currentInputPos];
 				}
 
-				// ¼ì²éµ±Ç°ÊäÈëĞÅºÅÊÇ·ñÔÚ±¾´ÎË¢ĞÂÁĞ±íÖĞ (ES5 ÊµÏÖ includes)
+				// æ£€æŸ¥å½“å‰è¾“å…¥ä¿¡å·æ˜¯å¦åœ¨æœ¬æ¬¡åˆ·æ–°åˆ—è¡¨ä¸­ (ES5 å®ç° includes)
 				var isRefreshed = false;
 				if (MPV.Refresh && Array.isArray(MPV.Refresh)) {
 					for (var i = 0; i < MPV.Refresh.length; i++) {
@@ -82,14 +82,14 @@ exports.call = function (MPV) {
 				}
 
 				if (isRefreshed) {
-					// ÅĞ¶ÏÉÏÉıÑØ£ºµ±Ç°Îª true ÇÒÉÏ´ÎÎª false
+					// åˆ¤æ–­ä¸Šå‡æ²¿ï¼šå½“å‰ä¸º true ä¸”ä¸Šæ¬¡ä¸º false
 					if (currentTriggerValue === true && previousTriggerValue === false) {
-						// ´¥·¢ÁË£¡´ÓÓ²±àÂëµÄ hardcodedStrings ¶ÔÏóÖĞ»ñÈ¡¶ÔÓ¦µÄ×Ö·û´®
-						// Ö»ÓĞµ± hardcodedStrings ÖĞ´æÔÚÕâ¸ö signalName ¶ÔÓ¦µÄ×Ö·û´®Ê±²Å¸³Öµ
+						// è§¦å‘äº†ï¼ä»ç¡¬ç¼–ç çš„ hardcodedStrings å¯¹è±¡ä¸­è·å–å¯¹åº”çš„å­—ç¬¦ä¸²
+						// åªæœ‰å½“ hardcodedStrings ä¸­å­˜åœ¨è¿™ä¸ª signalName å¯¹åº”çš„å­—ç¬¦ä¸²æ—¶æ‰èµ‹å€¼
 						if (hardcodedStrings.hasOwnProperty(signalName)) {
-							// Èç¹ûÓĞ¶à¸ö´¥·¢£¬ÎÒÃÇÖ»·¢ËÍµÚÒ»¸ö´¥·¢µÄ×Ö·û´®
+							// å¦‚æœæœ‰å¤šä¸ªè§¦å‘ï¼Œæˆ‘ä»¬åªå‘é€ç¬¬ä¸€ä¸ªè§¦å‘çš„å­—ç¬¦ä¸²
 							if (!outputTriggered) {
-								// È·±£Ö»ÉèÖÃÒ»´ÎÒª·¢ËÍµÄÖµ
+								// ç¡®ä¿åªè®¾ç½®ä¸€æ¬¡è¦å‘é€çš„å€¼
 								valueToSend = hardcodedStrings[signalName];
 								outputTriggered = true;
 							}
@@ -97,21 +97,21 @@ exports.call = function (MPV) {
 					}
 				}
 
-				// 3. ¼ÇÂ¼±¾´ÎÊäÈëĞÅºÅµÄ×´Ì¬µ½ PrivateInfo£¬¹©ÏÂ´Îµ÷ÓÃÊ¹ÓÃ
+				// 3. è®°å½•æœ¬æ¬¡è¾“å…¥ä¿¡å·çš„çŠ¶æ€åˆ° PrivateInfoï¼Œä¾›ä¸‹æ¬¡è°ƒç”¨ä½¿ç”¨
 				MRV.PrivateInfo.InputPreviousValue[currentInputPos] =
 					currentTriggerValue;
 			}
 		}
 	}
 
-	// 4. ¸ù¾İÊÇ·ñ´¥·¢ÉèÖÃ×îÖÕÊä³ö
+	// 4. æ ¹æ®æ˜¯å¦è§¦å‘è®¾ç½®æœ€ç»ˆè¾“å‡º
 	if (outputTriggered) {
-		MRV.Output[serialOutPos] = valueToSend; // ½«ÊÕ¼¯µ½µÄ×Ö·û´®¸³¸øÊä³ö¶Ë¿Ú
-		MRV.Refresh.push(serialOutPos); // ±ê¼ÇÊä³ö¶Ë¿ÚÓĞË¢ĞÂ
+		MRV.Output[serialOutPos] = valueToSend; // å°†æ”¶é›†åˆ°çš„å­—ç¬¦ä¸²èµ‹ç»™è¾“å‡ºç«¯å£
+		MRV.Refresh.push(serialOutPos); // æ ‡è®°è¾“å‡ºç«¯å£æœ‰åˆ·æ–°
 	} else {
-		MRV.Output[serialOutPos] = ""; // Èç¹ûÃ»ÓĞÈÎºÎ´¥·¢£¬Êä³öÎª¿Õ
+		MRV.Output[serialOutPos] = ""; // å¦‚æœæ²¡æœ‰ä»»ä½•è§¦å‘ï¼Œè¾“å‡ºä¸ºç©º
 	}
 
-	// 5. ·µ»Ø MRV
+	// 5. è¿”å› MRV
 	return MRV;
 };

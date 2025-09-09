@@ -1,9 +1,10 @@
 /*
-文件名称: Volume Control with Checksum.js
-功能: 接收模拟量，生成带动态校验码的音量指令。
+文件名称: Volume Control with Checksum (Dual Output).js
+功能: 接收模拟量，输出带校验码的指令和音量百分比。
 信号：
   输入 Pos1 (Analog): 原始音量值 (0-65535)
   输出 Pos1 (Serial): 完整的音量控制指令 (Uint8Array)
+  输出 Pos2 (Analog): 音量百分比 (0-100)
 */
 
 /**
@@ -27,7 +28,10 @@ function calculateChecksum(commandData) {
 exports.call = function (MPV) {
 	// 1. 初始化MRV对象
 	var mrv = {
-		Output: { Pos1: null },
+		Output: {
+			Pos1: null, // 指令输出
+			Pos2: null, // 百分比输出
+		},
 		PrivateInfo: {
 			OutputPreviousValue:
 				(MPV.PrivateInfo && MPV.PrivateInfo.OutputPreviousValue) || {},
@@ -43,6 +47,7 @@ exports.call = function (MPV) {
 	// 2. 获取模拟量输入
 	var volInput = MPV.Input["Pos1"];
 	var command = null;
+	var volumePercent = null;
 
 	if (
 		volInput &&
@@ -57,40 +62,42 @@ exports.call = function (MPV) {
 
 		// 4. 变化检测：只有当音量变化时才生成新指令
 		if (currentVolumePercent !== mrv.PrivateInfo.PrevVolume) {
-			// 5. 生成指令
-			// a. 定义指令模板，音量和校验位暂时为0
+			// 5. 生成指令 (Pos1 输出)
 			var commandTemplate = [
 				0x56, 0x50, 0x00, 0x08, 0x00, 0x20, 0x00, 0x03, 0x03, 0x01, 0x00, 0x01,
 				0x00, 0xaa,
 			];
-
-			// b. 填入音量值 (第11个字节，索引为10)
-			commandTemplate[10] = currentVolumePercent;
-
-			// c. 截取需要计算校验的数据部分 (前12个字节)
+			commandTemplate[10] = currentVolumePercent; // 填入音量
 			var dataForChecksum = commandTemplate.slice(0, 12);
-
-			// d. 计算校验码
 			var checksum = calculateChecksum(dataForChecksum);
-
-			// e. 填入校验码 (第13个字节，索引为12)
-			commandTemplate[12] = checksum;
-
-			// f. 生成最终的Uint8Array指令
+			commandTemplate[12] = checksum; // 填入校验码
 			command = new Uint8Array(commandTemplate);
 
-			mrv.Refresh.push("Pos1");
+			// 6. 准备百分比数值 (Pos2 输出)
+			volumePercent = currentVolumePercent+"%";
+
+			// 7. 标记两个输出都有刷新
+			mrv.Refresh.push("Pos1", "Pos2");
 		}
 
-		// 6. 更新状态
+		// 8. 更新状态
 		mrv.PrivateInfo.PrevVolume = currentVolumePercent;
 	}
 
-	// 7. 设置最终的输出值
+	// 9. 设置最终的输出值
 	mrv.Output.Pos1 =
 		command !== null ? command : mrv.PrivateInfo.OutputPreviousValue.Pos1;
-	mrv.PrivateInfo.OutputPreviousValue.Pos1 = mrv.Output.Pos1;
+	mrv.Output.Pos2 =
+		volumePercent !== null
+			? volumePercent
+			: mrv.PrivateInfo.OutputPreviousValue.Pos2;
 
-	// 8. 返回结果
+	// 保存本次的两个输出值，供下次维持状态使用
+	mrv.PrivateInfo.OutputPreviousValue = {
+		Pos1: mrv.Output.Pos1,
+		Pos2: mrv.Output.Pos2,
+	};
+
+	// 10. 返回结果
 	return mrv;
 };

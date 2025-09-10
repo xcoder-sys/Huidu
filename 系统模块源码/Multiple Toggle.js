@@ -13,7 +13,7 @@
  当<setN>-<resetN>-<clockN>信号同时持续为高时，<outN>置低，按照<resetN>-<setN>-<clockN>抬起的顺序<outN>信号变化为高-低-低，
  此顺序代表了三个信号的优先级，如果按照<clockN>-<setN>-<resetN>的顺序那么<outN>还是置低状态。
  任何时候输出<outN>与输出<outN*>都为相反的状态。
- 作者: 李帆
+ 
 
  版本说明: M3后台1.5.8正式发行版
  修改描述:

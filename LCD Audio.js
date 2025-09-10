@@ -1,38 +1,38 @@
 /*
-ÎÄ¼şÃû³Æ: LCD Volume Control.js
-¹¦ÄÜ: ½ÓÊÕÄ£ÄâÁ¿£¬Êä³öÒôÁ¿Ö¸ÁîºÍÒôÁ¿°Ù·Ö±È¡£
-ĞÅºÅ£º
-  ÊäÈë Pos1 (Analog): Ô­Ê¼ÒôÁ¿Öµ (0-65535)
-  Êä³ö Pos1 (Serial): ÒôÁ¿¿ØÖÆÖ¸Áî (Uint8Array)
-  Êä³ö Pos2 (Analog): ÒôÁ¿°Ù·Ö±È (0-100)
+æ–‡ä»¶åç§°: LCD Volume Control.js
+åŠŸèƒ½: æ¥æ”¶æ¨¡æ‹Ÿé‡ï¼Œè¾“å‡ºéŸ³é‡æŒ‡ä»¤å’ŒéŸ³é‡ç™¾åˆ†æ¯”ã€‚
+ä¿¡å·ï¼š
+  è¾“å…¥ Pos1 (Analog): åŸå§‹éŸ³é‡å€¼ (0-65535)
+  è¾“å‡º Pos1 (Serial): éŸ³é‡æ§åˆ¶æŒ‡ä»¤ (Uint8Array)
+  è¾“å‡º Pos2 (Analog): éŸ³é‡ç™¾åˆ†æ¯” (0-100)
 */
 
 exports.call = function (MPV) {
-	// 1. ³õÊ¼»¯MRV¶ÔÏó
+	// 1. åˆå§‹åŒ–MRVå¯¹è±¡
 	var mrv = {
 		Output: {
-			Pos1: null, // Ö¸ÁîÊä³ö
-			Pos2: null, // °Ù·Ö±ÈÊä³ö
+			Pos1: null, // æŒ‡ä»¤è¾“å‡º
+			Pos2: null, // ç™¾åˆ†æ¯”è¾“å‡º
 		},
 		PrivateInfo: {
-			// ´ÓMPV»Ö¸´ÉÏÒ»´ÎµÄ×´Ì¬
+			// ä»MPVæ¢å¤ä¸Šä¸€æ¬¡çš„çŠ¶æ€
 			OutputPreviousValue:
 				(MPV.PrivateInfo && MPV.PrivateInfo.OutputPreviousValue) || {},
 			PrevVolume:
 				MPV.PrivateInfo && MPV.PrivateInfo.PrevVolume !== undefined
 					? MPV.PrivateInfo.PrevVolume
-					: -1, // Ê¹ÓÃ-1×÷Îª³õÊ¼Öµ£¬È·±£Ê×´Î±Ø´¥·¢
+					: -1, // ä½¿ç”¨-1ä½œä¸ºåˆå§‹å€¼ï¼Œç¡®ä¿é¦–æ¬¡å¿…è§¦å‘
 		},
 		Refresh: [],
 		Token: MPV.Token,
 	};
 
-	// 2. »ñÈ¡Ä£ÄâÁ¿ÊäÈë
+	// 2. è·å–æ¨¡æ‹Ÿé‡è¾“å…¥
 	var volInput = MPV.Input["Pos1"];
 	var command = null;
 	var volumePercent = null;
 
-	// ¼ì²éÊäÈëÊÇ·ñÓĞĞ§
+	// æ£€æŸ¥è¾“å…¥æ˜¯å¦æœ‰æ•ˆ
 	if (
 		volInput &&
 		volInput.SignalValue !== null &&
@@ -40,43 +40,43 @@ exports.call = function (MPV) {
 	) {
 		var rawValue = volInput.SignalValue;
 
-		// 3. ½« 0-65535 µÄÔ­Ê¼Öµ×ª»»Îª 0-100 µÄ°Ù·Ö±È
+		// 3. å°† 0-65535 çš„åŸå§‹å€¼è½¬æ¢ä¸º 0-100 çš„ç™¾åˆ†æ¯”
 		var normalized = Math.max(0, Math.min(65535, rawValue)) / 65535;
 		var currentVolumePercent = Math.round(normalized * 100);
 
-		// 4. ±ä»¯¼ì²â£ºÖ»ÓĞµ±¼ÆËã³öµÄÒôÁ¿ÓëÉÏ´Î²»Í¬Ê±£¬²ÅÉú³ÉĞÂÖ¸Áî
+		// 4. å˜åŒ–æ£€æµ‹ï¼šåªæœ‰å½“è®¡ç®—å‡ºçš„éŸ³é‡ä¸ä¸Šæ¬¡ä¸åŒæ—¶ï¼Œæ‰ç”Ÿæˆæ–°æŒ‡ä»¤
 		if (currentVolumePercent !== mrv.PrivateInfo.PrevVolume) {
-			// 5. Éú³ÉÁ½Â·Êä³ö
-			// Êä³ö1: ¿ØÖÆÖ¸Áî (×Ö½ÚÊı×é)
+			// 5. ç”Ÿæˆä¸¤è·¯è¾“å‡º
+			// è¾“å‡º1: æ§åˆ¶æŒ‡ä»¤ (å­—èŠ‚æ•°ç»„)
 			command = new Uint8Array([0x05, 0x00, 0x08, 0x00, currentVolumePercent]);
 
-			// Êä³ö2: ÒôÁ¿°Ù·Ö±È (ÊıÖµ)
+			// è¾“å‡º2: éŸ³é‡ç™¾åˆ†æ¯” (æ•°å€¼)
 			volumePercent = currentVolumePercent + "%";
 
-			// ±ê¼ÇÁ½¸öÊä³ö¶¼ÓĞË¢ĞÂ
+			// æ ‡è®°ä¸¤ä¸ªè¾“å‡ºéƒ½æœ‰åˆ·æ–°
 			mrv.Refresh.push("Pos1", "Pos2");
 		}
 
-		// 6. ¸üĞÂ×´Ì¬£ºÎŞÂÛÊÇ·ñ·¢ËÍÖ¸Áî£¬¶¼¸üĞÂ¡°ÉÏ´ÎÒôÁ¿¡±µÄ¼ÇÒä
+		// 6. æ›´æ–°çŠ¶æ€ï¼šæ— è®ºæ˜¯å¦å‘é€æŒ‡ä»¤ï¼Œéƒ½æ›´æ–°â€œä¸Šæ¬¡éŸ³é‡â€çš„è®°å¿†
 		mrv.PrivateInfo.PrevVolume = currentVolumePercent;
 	}
 
-	// 7. ÉèÖÃ×îÖÕµÄÊä³öÖµ
-	// Èç¹ûÓĞĞÂÖ¸Áî£¬ÔòÊ¹ÓÃĞÂÖµ£»·ñÔò£¬Î¬³ÖÉÏÒ»´ÎµÄÊä³öÖµ
+	// 7. è®¾ç½®æœ€ç»ˆçš„è¾“å‡ºå€¼
+	// å¦‚æœæœ‰æ–°æŒ‡ä»¤ï¼Œåˆ™ä½¿ç”¨æ–°å€¼ï¼›å¦åˆ™ï¼Œç»´æŒä¸Šä¸€æ¬¡çš„è¾“å‡ºå€¼
 	mrv.Output.Pos1 =
 		command !== null ? command : mrv.PrivateInfo.OutputPreviousValue.Pos1;
-	// °Ù·Ö±ÈÊä³öÒ²Ò»Ñù´¦Àí
+	// ç™¾åˆ†æ¯”è¾“å‡ºä¹Ÿä¸€æ ·å¤„ç†
 	mrv.Output.Pos2 =
 		volumePercent !== null
 			? volumePercent
 			: mrv.PrivateInfo.OutputPreviousValue.Pos2;
 
-	// ½«±¾´ÎµÄÊä³öÖµ´æÈëPrivateInfo£¬¹©ÏÂ´ÎÎ¬³Ö×´Ì¬Ê¹ÓÃ
+	// å°†æœ¬æ¬¡çš„è¾“å‡ºå€¼å­˜å…¥PrivateInfoï¼Œä¾›ä¸‹æ¬¡ç»´æŒçŠ¶æ€ä½¿ç”¨
 	mrv.PrivateInfo.OutputPreviousValue = {
 		Pos1: mrv.Output.Pos1,
 		Pos2: mrv.Output.Pos2,
 	};
 
-	// 8. ·µ»Ø½á¹û
+	// 8. è¿”å›ç»“æœ
 	return mrv;
 };

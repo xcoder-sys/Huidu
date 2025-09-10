@@ -1,6 +1,5 @@
 /*
- ©2017-2018 Beijing Tsingli Technology Co., Ltd. All Rights Reserved.
- ©2017-2018 北京清立科技有限公司。保留所有权利。
+ 
 
  文件名称: Serial Send 2.js
  功能:
@@ -12,7 +11,7 @@
  描述：
  串行发送模块在每一个输入数字量信号<trigN>的上升沿发送<stringN>参数定义的字符串到输出<out$>。
  如果同时有多个<trigN>触发时，将输出最后一个。。
- 作者: 路艳芳
+ 
 
  版本说明: M3后台1.0正式发行版
  修改描述:

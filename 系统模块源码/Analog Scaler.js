@@ -15,7 +15,7 @@
  <ain> * <span> / <divisor>除不尽时四舍五入。
  如果输入为<ain>为0，不管<span> 、<divisor>值为多少，输出为<offset>。
  其中参数<span>、<offset>、<divisor>的取值范围均为0-65535，精度为1。
- 作者: 路艳芳
+ 
 
  版本说明: M3后台1.0正式发行版
  修改描述:

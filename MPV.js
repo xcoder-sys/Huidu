@@ -40,7 +40,7 @@ MPV = {
 		},
 		StaticParameter: {
 			//参数名和参数位置映射关系
-			srting1: "Pos1", //参数名"srting1"对应信号位置"Pos1" ……
+			string1: "Pos1", //参数名"string1"对应信号位置"Pos1" ……
 		},
 	},
 	PrivateInfo: {
